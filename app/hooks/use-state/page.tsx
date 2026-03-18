@@ -68,7 +68,7 @@ export default function UseStatePage() {
 
       <motion.p style={s.subtitle} {...fadeUp(0.13)}>
         The foundational hook for local component state. Every React developer
-        reaches for <Code>useState</Code> first — understanding it deeply sets
+        reaches for <Code>useState</Code> first, understanding it deeply sets
         the baseline for every hook that follows.
       </motion.p>
 

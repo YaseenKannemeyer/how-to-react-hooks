@@ -13,6 +13,7 @@ import { C } from "@/components/styles";
 const MONO = "'Overpass Mono', 'Courier New', monospace";
 const SERIF = "'Lora', Georgia, serif";
 
+// ── Floating code fragments ────────────────────────────────────
 const CODE_FRAGMENTS = [
   "useState(0)",
   "useEffect(() => {",
@@ -30,17 +31,6 @@ const CODE_FRAGMENTS = [
   "[ ]",
   "prev => prev + 1",
   "event.target.value",
-];
-
-const HOOK_NAMES = [
-  "useState",
-  "useEffect",
-  "useRef",
-  "useContext",
-  "useReducer",
-  "useMemo",
-  "useCallback",
-  "useId",
 ];
 
 interface Particle {
@@ -65,76 +55,72 @@ function useParticles(count: number): Particle[] {
         duration: 18 + Math.random() * 24,
         delay: Math.random() * -30,
         text: CODE_FRAGMENTS[i % CODE_FRAGMENTS.length],
-        opacity: 0.04 + Math.random() * 0.07,
-        size: 11 + Math.random() * 5,
+        opacity: 0.035 + Math.random() * 0.055,
+        size: 11 + Math.random() * 4,
       })),
     );
   }, [count]);
   return particles;
 }
 
-function HookTicker() {
-  const [index, setIndex] = useState(0);
+// ── Word-by-word reveal ────────────────────────────────────────
+function WordReveal({
+  text,
+  delay = 0,
+  color,
+  style = {},
+}: {
+  text: string;
+  delay?: number;
+  color?: string;
+  style?: React.CSSProperties;
+}) {
   const shouldReduce = useReducedMotion();
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIndex((i) => (i + 1) % HOOK_NAMES.length);
-    }, 2200);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <span
-      style={{
-        display: "block",
-        position: "relative",
-        height: "1.25em",
-        overflow: "hidden",
-        width: "100%",
-      }}
-    >
-      {HOOK_NAMES.map((name, i) => (
-        <motion.span
-          key={name}
-          initial={{ y: "100%", opacity: 0 }}
-          animate={
-            i === index
-              ? { y: "0%", opacity: 1 }
-              : i === (index - 1 + HOOK_NAMES.length) % HOOK_NAMES.length
-                ? { y: "-100%", opacity: 0 }
-                : { y: "100%", opacity: 0 }
-          }
-          transition={
-            shouldReduce
-              ? { duration: 0 }
-              : { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const }
-          }
+    <>
+      {text.split(" ").map((word, i) => (
+        <span
+          key={i}
           style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: "block",
-            textAlign: "center",
-            fontFamily: MONO,
-            color: C.purple,
-            fontWeight: 700,
+            display: "inline-block",
+            overflow: "hidden",
+            verticalAlign: "bottom",
+            marginRight: "0.26em",
           }}
         >
-          {name}
-        </motion.span>
+          <motion.span
+            initial={{ y: "115%", opacity: 0 }}
+            animate={{ y: "0%", opacity: 1 }}
+            transition={
+              shouldReduce
+                ? { duration: 0 }
+                : {
+                    duration: 0.7,
+                    ease: [0.22, 1, 0.36, 1] as const,
+                    delay: delay + i * 0.08,
+                  }
+            }
+            style={{
+              display: "inline-block",
+              color: color ?? C.text,
+              ...style,
+            }}
+          >
+            {word}
+          </motion.span>
+        </span>
       ))}
-    </span>
+    </>
   );
 }
 
+// ── Main ──────────────────────────────────────────────────────
 export default function HeroHeader({
   authorName = "Yaseen",
 }: {
   authorName?: string;
 }) {
-  const particles = useParticles(16);
+  const particles = useParticles(18);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
@@ -142,9 +128,9 @@ export default function HeroHeader({
     offset: ["start start", "end start"],
   });
 
-  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
+  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.55], [1, 0]);
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "35%"]);
 
   const scrollToHooks = () => {
     document
@@ -160,14 +146,13 @@ export default function HeroHeader({
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
         background: C.bg,
         borderBottom: `1px solid ${C.border}`,
       }}
     >
-      {/* Background grid */}
+      {/* ── Background grid + vignette ── */}
       <motion.div
         style={{
           y: bgY,
@@ -177,13 +162,14 @@ export default function HeroHeader({
         }}
       >
         <svg
+          aria-hidden="true"
           width="100%"
           height="100%"
-          style={{ position: "absolute", inset: 0 }}
+          style={{ position: "absolute", inset: 0, opacity: 0.04 }}
         >
           <defs>
             <pattern
-              id="grid"
+              id="hero-grid"
               width="48"
               height="48"
               patternUnits="userSpaceOnUse"
@@ -191,24 +177,23 @@ export default function HeroHeader({
               <path
                 d="M 48 0 L 0 0 0 48"
                 fill="none"
-                stroke={C.purpleMid}
+                stroke={C.purple}
                 strokeWidth="0.5"
-                opacity="0.4"
               />
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
+          <rect width="100%" height="100%" fill="url(#hero-grid)" />
         </svg>
         <div
           style={{
             position: "absolute",
             inset: 0,
-            background: `radial-gradient(ellipse 80% 80% at 50% 50%, transparent 30%, ${C.bg} 100%)`,
+            background: `radial-gradient(ellipse 90% 90% at 40% 55%, transparent 25%, ${C.bg} 100%)`,
           }}
         />
       </motion.div>
 
-      {/* Floating code fragments */}
+      {/* ── Floating fragments ── */}
       <div
         style={{
           position: "absolute",
@@ -245,337 +230,303 @@ export default function HeroHeader({
         ))}
       </div>
 
-      {/* Brackets — desktop only */}
-      <style>{`
-        .hero-bracket { display: none; }
-        @media (min-width: 900px) { .hero-bracket { display: block; } }
-        @keyframes heroPulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(0.8); }
-        }
-      `}</style>
-
-      <motion.span
-        className="hero-bracket"
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 0.18, x: 0 }}
-        transition={{
-          duration: 1.2,
-          ease: [0.22, 1, 0.36, 1] as const,
-          delay: 0.6,
-        }}
-        style={{
-          fontFamily: MONO,
-          fontSize: "clamp(4rem, 10vw, 8rem)",
-          color: C.purple,
-          lineHeight: 1,
-          userSelect: "none",
-          position: "absolute",
-          top: "50%",
-          transform: "translateY(-50%)",
-          left: "1.5rem",
-        }}
-      >
-        {"{"}
-      </motion.span>
-
-      <motion.span
-        className="hero-bracket"
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 0.18, x: 0 }}
-        transition={{
-          duration: 1.2,
-          ease: [0.22, 1, 0.36, 1] as const,
-          delay: 0.6,
-        }}
-        style={{
-          fontFamily: MONO,
-          fontSize: "clamp(4rem, 10vw, 8rem)",
-          color: C.purple,
-          lineHeight: 1,
-          userSelect: "none",
-          position: "absolute",
-          top: "50%",
-          transform: "translateY(-50%)",
-          right: "1.5rem",
-        }}
-      >
-        {"}"}
-      </motion.span>
-
-      {/* Hero content */}
+      {/* ── Content ── */}
       <motion.div
         style={{
           y: contentY,
           opacity: contentOpacity,
           position: "relative",
           zIndex: 10,
-          textAlign: "center",
-          padding: "2rem clamp(1.5rem, 8vw, 6rem)",
+          padding: "0 clamp(1.75rem, 7vw, 5rem)",
+          maxWidth: "900px",
           width: "100%",
-          maxWidth: "860px",
           boxSizing: "border-box",
         }}
       >
-        {/* Badge */}
+        {/* ── Top meta row ── */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 0.6,
-            ease: [0.22, 1, 0.36, 1] as const,
-            delay: 0.1,
-          }}
-          style={{ marginBottom: "2rem" }}
-        >
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              fontSize: "10px",
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              fontFamily: MONO,
-              color: C.purple,
-              background: C.purpleLight,
-              border: `1px solid ${C.purpleBorder}`,
-              borderRadius: "999px",
-              padding: "5px 16px",
-            }}
-          >
-            <span
-              style={{
-                width: "6px",
-                height: "6px",
-                borderRadius: "50%",
-                background: C.purple,
-                flexShrink: 0,
-                animation: "heroPulse 2s ease-in-out infinite",
-              }}
-            />
-            Visual guide · React 18+
-          </span>
-        </motion.div>
-
-        {/* Title */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-        >
-          <h1
-            style={{
-              fontFamily: SERIF,
-              fontSize: "clamp(2rem, 7vw, 5rem)",
-              fontWeight: 400,
-              color: C.text,
-              lineHeight: 1.1,
-              margin: "0 0 0.4em",
-              letterSpacing: "-0.01em",
-            }}
-          >
-            How to React
-          </h1>
-          <h1
-            style={{
-              fontFamily: SERIF,
-              fontSize: "clamp(2rem, 7vw, 5rem)",
-              fontWeight: 400,
-              color: C.text,
-              lineHeight: 1.1,
-              margin: "0 0 1em",
-              letterSpacing: "-0.01em",
-            }}
-          >
-            <HookTicker />
-          </h1>
-        </motion.div>
-
-        {/* Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.35 }}
-          style={{
-            fontFamily: SERIF,
-            fontSize: "clamp(1rem, 2.5vw, 1.15rem)",
-            color: C.textMid,
-            lineHeight: 1.8,
-            maxWidth: "520px",
-            margin: "0 auto 2.5rem",
-          }}
-        >
-          Deep-dive visual guides to every React hook — working examples, real
-          pitfalls, and the mental models that finally make them click.
-        </motion.p>
-
-        {/* Author + CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 0.6,
-            ease: [0.22, 1, 0.36, 1] as const,
-            delay: 0.48,
-          }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.05 }}
           style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            gap: "1.5rem",
-            flexWrap: "wrap",
+            gap: "10px",
+            marginBottom: "3rem",
           }}
         >
-          {/* Author */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <div
-              style={{
-                width: "38px",
-                height: "38px",
-                borderRadius: "50%",
-                background: C.purpleLight,
-                border: `1.5px solid ${C.purpleBorder}`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontFamily: MONO,
-                fontWeight: 700,
-                fontSize: "13px",
-                color: C.purple,
-                flexShrink: 0,
-              }}
-            >
-              {authorName.charAt(0).toUpperCase()}
-            </div>
-            <div style={{ textAlign: "left" }}>
-              <p
-                style={{
-                  fontFamily: MONO,
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  color: C.text,
-                  margin: 0,
-                  lineHeight: 1.3,
-                }}
-              >
-                {authorName}
-              </p>
-              <p
-                style={{
-                  fontFamily: MONO,
-                  fontSize: "10px",
-                  color: C.textMuted,
-                  margin: 0,
-                  letterSpacing: "0.06em",
-                }}
-              >
-                Author
-              </p>
-            </div>
-          </div>
-
-          {/* Dot divider */}
-          <span
+          {/* Live dot */}
+          <motion.span
+            animate={{ opacity: [1, 0.25, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             style={{
-              width: "4px",
-              height: "4px",
+              width: "7px",
+              height: "7px",
               borderRadius: "50%",
-              background: C.purpleMid,
+              background: C.purple,
               flexShrink: 0,
+              display: "inline-block",
             }}
           />
 
-          {/* CTA */}
+          {/* Label chips */}
+          {["React 18+", "Visual Guide", "16 Hooks"].map((label, i) => (
+            <React.Fragment key={label}>
+              <span
+                style={{
+                  fontSize: "10px",
+                  fontFamily: MONO,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: i === 0 ? C.purple : C.textMuted,
+                  fontWeight: i === 0 ? 600 : 400,
+                }}
+              >
+                {label}
+              </span>
+              {i < 2 && (
+                <span
+                  style={{
+                    fontSize: "10px",
+                    color: C.purpleMid,
+                    fontFamily: MONO,
+                  }}
+                >
+                  ·
+                </span>
+              )}
+            </React.Fragment>
+          ))}
+        </motion.div>
+
+        {/* ── Top rule ── */}
+        <div style={{ marginBottom: "2.25rem", overflow: "hidden" }}>
+          <motion.div
+            initial={{ width: "0%" }}
+            animate={{ width: "100%" }}
+            transition={{
+              duration: 1,
+              ease: [0.22, 1, 0.36, 1] as const,
+              delay: 0.2,
+            }}
+            style={{
+              height: "1px",
+              background: `linear-gradient(to right, ${C.purple}, ${C.purpleLight}, transparent)`,
+            }}
+          />
+        </div>
+
+        {/* ── Main heading ── */}
+        <h1
+          style={{
+            fontSize: "clamp(2.8rem, 7.5vw, 6rem)",
+            fontFamily: SERIF,
+            fontWeight: 400,
+            fontStyle: "italic",
+            lineHeight: 1.05,
+            letterSpacing: "-0.025em",
+            margin: "0 0 0.15em",
+            color: C.text,
+          }}
+        >
+          <span style={{ display: "block" }}>
+            <WordReveal text="Master every" delay={0.35} />
+          </span>
+          <span style={{ display: "block" }}>
+            <WordReveal text="React" delay={0.52} color={C.textMid} />{" "}
+            <WordReveal
+              text="Hook."
+              delay={0.6}
+              color={C.purple}
+              style={{
+                fontStyle: "normal",
+                fontFamily: MONO,
+                fontSize: "0.78em",
+                letterSpacing: "-0.04em",
+                fontWeight: 600,
+              }}
+            />
+          </span>
+        </h1>
+
+        {/* ── Sub rule ── */}
+        <div style={{ margin: "2rem 0 1.75rem", overflow: "hidden" }}>
+          <motion.div
+            initial={{ width: "0%" }}
+            animate={{ width: "35%" }}
+            transition={{ duration: 0.7, ease: "easeOut", delay: 0.9 }}
+            style={{ height: "1px", background: C.purpleBorder }}
+          />
+        </div>
+
+        {/* ── Subtitle ── */}
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut", delay: 1.0 }}
+          style={{
+            fontSize: "14px",
+            fontFamily: MONO,
+            color: C.textMid,
+            lineHeight: 1.9,
+            maxWidth: "480px",
+            margin: "0 0 2.75rem",
+            letterSpacing: "0.01em",
+          }}
+        >
+          From <span style={{ color: C.text, fontWeight: 600 }}>useState</span>{" "}
+          to{" "}
+          <span style={{ color: C.text, fontWeight: 600 }}>
+            useImperativeHandle,
+          </span>{" "}
+          every hook explained with working examples, pitfalls, and the mental
+          models that make them click.
+        </motion.p>
+
+        {/* ── Button row ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 1.1 }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            flexWrap: "wrap",
+          }}
+        >
+          {/* Primary CTA */}
           <button
             onClick={scrollToHooks}
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: "8px",
+              gap: "10px",
               fontFamily: MONO,
-              fontSize: "12px",
-              fontWeight: 600,
-              letterSpacing: "0.08em",
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "0.12em",
               textTransform: "uppercase",
-              color: C.bg,
+              color: "#ffffff",
               background: C.purple,
-              border: "none",
-              borderRadius: "999px",
-              padding: "10px 24px",
+              border: `1.5px solid ${C.purple}`,
+              borderRadius: "4px",
+              padding: "12px 28px",
               cursor: "pointer",
-              transition: "background 0.18s, transform 0.15s",
+              transition: "all 0.2s ease",
+              position: "relative",
+              overflow: "hidden",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background =
-                C.purpleDeep;
-              (e.currentTarget as HTMLButtonElement).style.transform =
-                "translateY(-1px)";
+              const el = e.currentTarget as HTMLButtonElement;
+              el.style.background = C.purpleDeep;
+              el.style.borderColor = C.purpleDeep;
+              el.style.transform = "translateY(-2px)";
+              el.style.boxShadow = `0 8px 24px rgba(91,33,182,0.35)`;
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background =
-                C.purple;
-              (e.currentTarget as HTMLButtonElement).style.transform =
-                "translateY(0)";
+              const el = e.currentTarget as HTMLButtonElement;
+              el.style.background = C.purple;
+              el.style.borderColor = C.purple;
+              el.style.transform = "translateY(0)";
+              el.style.boxShadow = "none";
             }}
           >
-            Explore hooks
-            <span style={{ fontSize: "14px", lineHeight: 1 }}>↓</span>
+            Start learning
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              style={{ flexShrink: 0 }}
+            >
+              <path
+                d="M2 7h10M8 3l4 4-4 4"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
+        </motion.div>
+
+        {/* ── Author tag — bottom left, subtle ── */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1.5 }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            marginTop: "3.5rem",
+            paddingTop: "2rem",
+            borderTop: `1px solid ${C.border}`,
+          }}
+        >
+          {/* Avatar */}
+          <div
+            style={{
+              width: "30px",
+              height: "30px",
+              borderRadius: "50%",
+              background: C.purpleLight,
+              border: `1px solid ${C.purpleBorder}`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontFamily: MONO,
+              fontWeight: 700,
+              fontSize: "11px",
+              color: C.purple,
+              flexShrink: 0,
+            }}
+          >
+            {authorName.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <p
+              style={{
+                fontFamily: MONO,
+                fontSize: "11px",
+                fontWeight: 600,
+                color: C.text,
+                margin: 0,
+                lineHeight: 1.3,
+              }}
+            >
+              {authorName}
+            </p>
+            <p
+              style={{
+                fontFamily: MONO,
+                fontSize: "9px",
+                color: C.textMuted,
+                margin: 0,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+              }}
+            >
+              Author · React 18+ · Next.js App Router
+            </p>
+          </div>
         </motion.div>
       </motion.div>
 
-      {/* Bottom fade */}
+      {/* ── Bottom fade ── */}
       <div
         style={{
           position: "absolute",
           bottom: 0,
           left: 0,
           right: 0,
-          height: "80px",
+          height: "120px",
           background: `linear-gradient(to bottom, transparent, ${C.bg})`,
           pointerEvents: "none",
+          zIndex: 5,
         }}
       />
-
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 0.8 }}
-        style={{
-          position: "absolute",
-          bottom: "2rem",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 10,
-        }}
-      >
-        <motion.div
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          style={{
-            width: "20px",
-            height: "32px",
-            borderRadius: "999px",
-            border: `1.5px solid ${C.purpleBorder}`,
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "center",
-            padding: "4px 0",
-          }}
-        >
-          <div
-            style={{
-              width: "3px",
-              height: "8px",
-              borderRadius: "999px",
-              background: C.purple,
-              opacity: 0.7,
-            }}
-          />
-        </motion.div>
-      </motion.div>
     </div>
   );
 }
