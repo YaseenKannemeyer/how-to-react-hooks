@@ -1,26 +1,101 @@
-@import "tailwindcss";
+/* app/globals.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Overpass+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg:           #ffffff;
+  --surface:      #ffffff;
+  --surface-tint: #f3f0fb;
+  --purple:       #5b21b6;
+  --purple-deep:  #3b0764;
+  --purple-light: #ede9fe;
+  --purple-mid:   #ddd6fe;
+  --purple-dim:   #7c3aed;
+  --purple-border:#c4b5fd;
+  --text:         #1a1523;
+  --text-mid:     #4c4069;
+  --text-muted:   #8b7aa8;
+  --border:       #e8e1f5;
+  --font-serif:   'Lora', Georgia, 'Times New Roman', serif;
+  --font-mono:    'Overpass Mono', 'Courier New', monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-serif);
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+p {
+  color: var(--text-mid);
+  line-height: 1.8;
+}
+
+a {
+  color: var(--purple);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: var(--purple-deep);
+}
+
+code, pre, kbd {
+  font-family: var(--font-mono);
+}
+
+pre {
+  overflow-x: auto;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface-tint);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--purple-border);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--purple-dim);
+}
+
+::selection {
+  background: var(--purple-light);
+  color: var(--purple-deep);
+}
+
+:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
