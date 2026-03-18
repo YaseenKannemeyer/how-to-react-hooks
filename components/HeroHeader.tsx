@@ -108,7 +108,7 @@ function HookTicker() {
           transition={
             shouldReduce
               ? { duration: 0 }
-              : { duration: 0.55, ease: [0.22, 1, 0.36, 1] }
+              : { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const }
           }
           style={{
             position: "absolute",
@@ -259,7 +259,11 @@ export default function HeroHeader({
         className="hero-bracket"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 0.18, x: 0 }}
-        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.6 }}
+        transition={{
+          duration: 1.2,
+          ease: [0.22, 1, 0.36, 1] as const,
+          delay: 0.6,
+        }}
         style={{
           fontFamily: MONO,
           fontSize: "clamp(4rem, 10vw, 8rem)",
@@ -279,7 +283,11 @@ export default function HeroHeader({
         className="hero-bracket"
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 0.18, x: 0 }}
-        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.6 }}
+        transition={{
+          duration: 1.2,
+          ease: [0.22, 1, 0.36, 1] as const,
+          delay: 0.6,
+        }}
         style={{
           fontFamily: MONO,
           fontSize: "clamp(4rem, 10vw, 8rem)",
@@ -313,7 +321,11 @@ export default function HeroHeader({
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+          transition={{
+            duration: 0.6,
+            ease: [0.22, 1, 0.36, 1] as const,
+            delay: 0.1,
+          }}
           style={{ marginBottom: "2rem" }}
         >
           <span
@@ -402,7 +414,11 @@ export default function HeroHeader({
         <motion.div
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.48 }}
+          transition={{
+            duration: 0.6,
+            ease: [0.22, 1, 0.36, 1] as const,
+            delay: 0.48,
+          }}
           style={{
             display: "flex",
             alignItems: "center",

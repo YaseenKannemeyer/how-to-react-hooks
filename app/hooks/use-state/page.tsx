@@ -11,7 +11,7 @@ const MONO = "'Overpass Mono', 'Courier New', monospace";
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 18 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1], delay },
+  transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const, delay },
 });
 
 function Code({ children }: { children: React.ReactNode }) {
@@ -28,7 +28,7 @@ function Note({ children }: { children: React.ReactNode }) {
 
 function CodeBlock({ code }: { code: string }) {
   return (
-    <pre style={s.pre}>
+    <pre style={s.pre as React.CSSProperties}>
       <code>{code}</code>
     </pre>
   );
@@ -57,7 +57,6 @@ function StepCard({
 export default function UseStatePage() {
   return (
     <div style={s.section}>
-
       {/* Header */}
       <motion.div {...fadeUp(0)}>
         <span style={s.badge}>React Hooks Series</span>
@@ -95,11 +94,13 @@ export default function UseStatePage() {
         </StepCard>
 
         <StepCard num="02" title="The signature">
-          <CodeBlock code={`const [state, setState] = useState(initialValue);
+          <CodeBlock
+            code={`const [state, setState] = useState(initialValue);
 
 // state     → the current value
 // setState  → function to update the value
-// useState  → takes one argument: the initial state`} />
+// useState  → takes one argument: the initial state`}
+          />
           <Note>
             The array destructuring names are completely up to you. Convention
             is <Code>[value, setValue]</Code> — descriptive names make your
@@ -120,13 +121,15 @@ export default function UseStatePage() {
             prefer the functional updater form when the new value depends on the
             previous one.
           </p>
-          <CodeBlock code={`const [counter, setCounter] = useState(0);
+          <CodeBlock
+            code={`const [counter, setCounter] = useState(0);
 
 // ✓ safe — reads the latest value even when batched
 const increment = () => setCounter((prev) => prev + 1);
 
 // ✗ risky — can read stale value if updates are batched
-const increment = () => setCounter(counter + 1);`} />
+const increment = () => setCounter(counter + 1);`}
+          />
         </StepCard>
 
         <StepCard num="04" title="String state — controlled input">
@@ -135,14 +138,16 @@ const increment = () => setCounter(counter + 1);`} />
             keystroke via <Code>onChange</Code>. The component is always the
             single source of truth — React drives the input, not the browser.
           </p>
-          <CodeBlock code={`const [inputValue, setInputValue] = useState("Yaseen");
+          <CodeBlock
+            code={`const [inputValue, setInputValue] = useState("Yaseen");
 
 const onChange = (event) => {
   setInputValue(event.target.value);
 };
 
 // Wire it up:
-<input value={inputValue} onChange={onChange} />`} />
+<input value={inputValue} onChange={onChange} />`}
+          />
         </StepCard>
 
         <StepCard num="05" title="Multiple state variables">
@@ -151,9 +156,11 @@ const onChange = (event) => {
             manages one independent piece of state — keep them small and focused
             rather than bundling everything into one object.
           </p>
-          <CodeBlock code={`const [counter, setCounter]       = useState(0);
+          <CodeBlock
+            code={`const [counter, setCounter]       = useState(0);
 const [inputValue, setInputValue] = useState("Yaseen");
-const [isVisible, setIsVisible]   = useState(true);`} />
+const [isVisible, setIsVisible]   = useState(true);`}
+          />
         </StepCard>
       </motion.div>
 
@@ -171,30 +178,48 @@ const [isVisible, setIsVisible]   = useState(true);`} />
               order to track which state belongs to which hook.
             </li>
             <li style={{ marginTop: "0.5rem" }}>
-              <strong>Only call hooks from React function components</strong>{" "}
-              or your own custom hooks. Not from regular JS functions.
+              <strong>Only call hooks from React function components</strong> or
+              your own custom hooks. Not from regular JS functions.
             </li>
           </ul>
         </StepCard>
 
         <StepCard num="07" title="Common pitfalls">
-          <table style={s.table}>
+          <table style={s.table as React.CSSProperties}>
             <thead>
               <tr>
-                <th style={s.th}>Pitfall</th>
-                <th style={s.th}>Why it happens</th>
-                <th style={s.th}>Fix</th>
+                <th style={s.th as React.CSSProperties}>Pitfall</th>
+                <th style={s.th as React.CSSProperties}>Why it happens</th>
+                <th style={s.th as React.CSSProperties}>Fix</th>
               </tr>
             </thead>
             <tbody>
               {[
-                ["Stale state in handler", "Closure captures old value", "Use functional updater: prev => prev + 1"],
-                ["Object mutation", "React checks reference, not deep equality", "Spread: setState({ ...state, key: val })"],
-                ["Array mutation", "push/splice mutate in place", "Use [...arr, newItem] or .filter()"],
-                ["Expensive initial value", "Computed on every render", "Lazy init: useState(() => compute())"],
+                [
+                  "Stale state in handler",
+                  "Closure captures old value",
+                  "Use functional updater: prev => prev + 1",
+                ],
+                [
+                  "Object mutation",
+                  "React checks reference, not deep equality",
+                  "Spread: setState({ ...state, key: val })",
+                ],
+                [
+                  "Array mutation",
+                  "push/splice mutate in place",
+                  "Use [...arr, newItem] or .filter()",
+                ],
+                [
+                  "Expensive initial value",
+                  "Computed on every render",
+                  "Lazy init: useState(() => compute())",
+                ],
               ].map(([pitfall, why, fix], i) => (
                 <tr key={i}>
-                  <td style={{ ...s.td, color: C.purple, fontWeight: 600 }}>{pitfall}</td>
+                  <td style={{ ...s.td, color: C.purple, fontWeight: 600 }}>
+                    {pitfall}
+                  </td>
                   <td style={s.td}>{why}</td>
                   <td style={{ ...s.td, color: C.purpleDeep }}>{fix}</td>
                 </tr>
@@ -210,11 +235,13 @@ const [isVisible, setIsVisible]   = useState(true);`} />
       <motion.div {...fadeUp(0)}>
         <SectionLabel>04 — Live demo</SectionLabel>
 
-        <div style={{
-          ...s.stepCard,
-          background: C.surfaceTint,
-          border: `1px solid ${C.purpleBorder}`,
-        }}>
+        <div
+          style={{
+            ...s.stepCard,
+            background: C.surfaceTint,
+            border: `1px solid ${C.purpleBorder}`,
+          }}
+        >
           <div style={s.stepHeader}>
             <div style={s.stepNum}>↓</div>
             <span style={s.stepTitle}>StateTutorial — interactive</span>
@@ -224,13 +251,15 @@ const [isVisible, setIsVisible]   = useState(true);`} />
             functional updater form. The input is fully controlled — React owns
             the value.
           </p>
-          <div style={{
-            background: C.bg,
-            border: `1px solid ${C.border}`,
-            borderRadius: "10px",
-            padding: "1.5rem",
-            boxShadow: C.shadow,
-          }}>
+          <div
+            style={{
+              background: C.bg,
+              border: `1px solid ${C.border}`,
+              borderRadius: "10px",
+              padding: "1.5rem",
+              boxShadow: C.shadow,
+            }}
+          >
             <StateTutorial />
           </div>
         </div>
@@ -243,25 +272,32 @@ const [isVisible, setIsVisible]   = useState(true);`} />
         <SectionLabel>05 — Quick reference</SectionLabel>
 
         <div style={s.stepCard}>
-          <table style={s.table}>
+          <table style={s.table as React.CSSProperties}>
             <thead>
               <tr>
-                <th style={s.th}>Pattern</th>
-                <th style={s.th}>Code</th>
+                <th style={s.th as React.CSSProperties}>Pattern</th>
+                <th style={s.th as React.CSSProperties}>Code</th>
               </tr>
             </thead>
             <tbody>
               {[
-                ["Declare",               "const [val, setVal] = useState(init)"],
-                ["Update (direct)",       "setVal(newValue)"],
-                ["Update (from prev)",    "setVal(prev => prev + 1)"],
-                ["Update object",         "setVal(prev => ({ ...prev, key: x }))"],
-                ["Update array (add)",    "setVal(prev => [...prev, item])"],
+                ["Declare", "const [val, setVal] = useState(init)"],
+                ["Update (direct)", "setVal(newValue)"],
+                ["Update (from prev)", "setVal(prev => prev + 1)"],
+                ["Update object", "setVal(prev => ({ ...prev, key: x }))"],
+                ["Update array (add)", "setVal(prev => [...prev, item])"],
                 ["Update array (remove)", "setVal(prev => prev.filter(…))"],
-                ["Lazy initialiser",      "useState(() => expensiveCompute())"],
+                ["Lazy initialiser", "useState(() => expensiveCompute())"],
               ].map(([pattern, code], i) => (
                 <tr key={i}>
-                  <td style={{ ...s.td, color: C.purpleDim, fontWeight: 600, whiteSpace: "nowrap" }}>
+                  <td
+                    style={{
+                      ...s.td,
+                      color: C.purpleDim,
+                      fontWeight: 600,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
                     {pattern}
                   </td>
                   <td style={s.td}>
@@ -278,7 +314,8 @@ const [isVisible, setIsVisible]   = useState(true);`} />
       <motion.div {...fadeUp(0)} style={{ marginTop: "3rem" }}>
         <Note>
           Next in the series: <strong>useEffect</strong> — running side-effects
-          after render, controlling when they fire, and cleaning up after yourself.
+          after render, controlling when they fire, and cleaning up after
+          yourself.
         </Note>
       </motion.div>
 
