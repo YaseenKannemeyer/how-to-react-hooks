@@ -277,34 +277,9 @@ export default function BlogFooter() {
                   C.purpleLight;
               }}
             >
-              {/* Framer-ish icon */}
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                style={{ flexShrink: 0 }}
-              >
-                <path d="M4 4h16v8H4z" fill={C.purple} opacity="0.9" />
-                <path d="M4 12h8l8 8H4z" fill={C.purpleDim} opacity="0.75" />
-                <path d="M4 12l8 8v-8z" fill={C.purpleDeep} opacity="0.9" />
-              </svg>
+              {/* Framer icon */}
+              <img src="/favicon.svg" className="w-[13px] h-[13px] shrink-0" />
               Animate your UI with Framer Motion
-              <svg
-                width="11"
-                height="11"
-                viewBox="0 0 12 12"
-                fill="none"
-                style={{ flexShrink: 0, opacity: 0.6 }}
-              >
-                <path
-                  d="M2 10L10 2M10 2H4M10 2v6"
-                  stroke={C.purple}
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
             </motion.a>
           </motion.div>
 
